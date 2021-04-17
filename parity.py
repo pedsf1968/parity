@@ -8,7 +8,7 @@ import xml_analysis as x_an
 
 def main():
     c_an.launch_analysis('current_mps.csv')
-    x_an.launch_analysis('CRSANR5L15S2017E1N001.xml')
+    x_an.launch_analysis('SyceronBrut.xml')
 
 
 if __name__ == "__main__":

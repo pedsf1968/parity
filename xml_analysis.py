@@ -7,7 +7,7 @@ import os
 def launch_analysis(data_file):
     directory = os.path.dirname(__file__)
 
-    path_to_file = os.path.join(directory, "data", "compte_rendu", data_file)
+    path_to_file = os.path.join(directory, "data", data_file)
     with open(path_to_file, 'r') as f:
         preview = f.readline()
 
@@ -15,7 +15,7 @@ def launch_analysis(data_file):
 
 
 def main():
-    launch_analysis('CRSANR5L15S2017E1N001.xml')
+    launch_analysis('SyceronBrut.xml')
 
 
 if __name__ == "__main__":
