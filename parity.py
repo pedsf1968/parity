@@ -1,0 +1,15 @@
+#! /usr/bin/env python3
+# coding: utf-8
+
+# Import des modules
+import csv_analysis as c_an
+import xml_analysis as x_an
+
+
+def main():
+    c_an.launch_analysis('current_mps.csv')
+    x_an.launch_analysis('CRSANR5L15S2017E1N001.xml')
+
+
+if __name__ == "__main__":
+    main()
