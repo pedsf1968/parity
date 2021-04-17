@@ -1,14 +1,28 @@
 #! /usr/bin/env python3
 # coding: utf-8
 
+import argparse
+
 # Import des modules
-import csv_analysis as c_an
-import xml_analysis as x_an
+import analysis.csv as c_an
+import analysis.xml as x_an
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-e", "--extention", help="""Specify the type of file to analyse. CSV or XML? """)
+    parser.add_argument("-d", "--datafile", help="""Specify the name of the file to be analysed. """)
+    return parser.parse_args()
 
 
 def main():
-    c_an.launch_analysis('current_mps.csv')
-    x_an.launch_analysis('SyceronBrut.xml')
+    args = parse_arguments()
+    datafile = args.datafile
+
+    if args.extention == 'csv':
+        c_an.launch_analysis(datafile)
+    elif args.extention == 'xml':
+        x_an.launch_analysis(datafile)
 
 
 if __name__ == "__main__":
