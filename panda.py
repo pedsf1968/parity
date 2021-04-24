@@ -5,7 +5,6 @@ import os
 import logging as log
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 log.basicConfig(level=log.DEBUG)
 
