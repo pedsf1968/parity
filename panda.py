@@ -82,24 +82,22 @@ def array_operations():
 
 def csv_operations():
     directory = os.path.dirname(os.path.dirname(__file__))
-
-    path_to_file = os.path.join(directory, "data", "current_mps.csv")
+    path_to_file = os.path.join(directory, "parity", "data", "current_mps.csv")
 
     try:
         with open(path_to_file, 'r') as f:
-            mps = pd.read_csv("current_mps.csv", sep=";")
-            print(mps.iloc[1])
-
+            mps = pd.read_csv(path_to_file, sep=";")
             print(mps.iloc[0])
+
     except FileNotFoundError as e:
         log.critical('No file found! This is the message : {}'.format(e))
 
 
 def main():
-    # single_list()
-    # list_of_lists()
-     array_operations()
-    #csv_operations
+    single_list()
+    list_of_lists()
+    array_operations()
+    csv_operations()
 
 
 if __name__ == "__main__":
