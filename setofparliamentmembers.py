@@ -2,10 +2,10 @@
 # coding: utf-8
 
 import os
-import logging as log
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 
 class SetOfParliamentMembers:
     def __init__(self, name):
@@ -19,12 +19,15 @@ class SetOfParliamentMembers:
 
     def display_chart(self):
         data = self.dataframe
+        # seperate women and men in two dataframes
         female_mps = data[data.sexe == "F"]
         male_mps = data[data.sexe == "H"]
 
+        # calculate the percents
         counts = [len(female_mps), len(male_mps)]
         counts = np.array(counts)
         nb_mps = counts.sum()
+
         proportions = counts / nb_mps
 
         labels = ["Female ({})".format(counts[0]), "Male ({})".format(counts[1])]
@@ -67,3 +70,4 @@ class SetOfParliamentMembers:
         if by_party:
             for party, s in sopm.split_by_political_party().items():
                 s.display_chart()
+

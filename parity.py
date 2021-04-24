@@ -28,6 +28,5 @@ def main():
     elif args.extention == 'xml':
         x_an.launch_analysis(datafile)
 
-
 if __name__ == "__main__":
     main()
