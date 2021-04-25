@@ -31,6 +31,9 @@ class SetOfParliamentMembers:
     def __init__(self, name):
         self.name = name
 
+    def total_mps(self):
+        return len(self.dataframe)
+
     def data_from_csv(self, csv_file):
         self.dataframe = pd.read_csv(csv_file, sep=";")
 
@@ -161,7 +164,7 @@ def launch_analysis(data_file, by_party=False, info=False, displaynames=False,
     if info:
         log.info(sopm.number_of_mps)
         print()
-        print(repr(sopm))
+        print(repr(sopm.total_mps()))
 
     if displaynames:
         log.info("Display names")
