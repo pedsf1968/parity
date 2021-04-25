@@ -2,12 +2,12 @@
 # coding: utf-8
 
 import argparse
+import re
 import logging as log
 
 import analysis.csv as c_an
 import analysis.xml as x_an
 
-HELP_EXTENTION = "Specify the type of file to analyse. CSV or XML?"
 HELP_DATAFILE = "Specify the name of the file to be analysed."
 HELP_BYPARTY = "Display a chart for each party."
 HELP_SEARCH_BY_NAME = "Get parlementary member by his name."
@@ -21,7 +21,6 @@ HELP_VERBOSE = "Specify to run the program in DEBUG level. "
 def parse_arguments():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-e", "--extention", help=HELP_EXTENTION)
     parser.add_argument("-d", "--datafile", help=HELP_DATAFILE)
     parser.add_argument("-s", "--searchname", help=HELP_SEARCH_BY_NAME)
     parser.add_argument("-I", "--index", help=HELP_SEARCH_BY_INDEX)
@@ -50,10 +49,13 @@ def main():
         else:
             log.basicConfig(level=log.WARNING)
 
-        if args.extention == 'csv':
+        e = re.search(r'^.+\.(\D{3})$', args.datafile)
+        extention = e.group(1)
+
+        if extention == 'csv':
             c_an.launch_analysis(datafile, args.byparty, args.info, args.displaynames,
                                  args.searchname, args.index, args.groupfirst)
-        elif args.extention == 'xml':
+        elif extention == 'xml':
             x_an.launch_analysis(datafile)
     finally:
         log.info('Analysis is done')
