@@ -31,14 +31,15 @@ class SetOfParliamentMembers:
     def __init__(self, name):
         self.name = name
 
-    def total_mps(self):
-        return len(self.dataframe)
-
     def data_from_csv(self, csv_file):
         self.dataframe = pd.read_csv(csv_file, sep=";")
+        parties = self.dataframe["parti_ratt_financier"].dropna().values
+        self._register_parties(parties)
 
     def data_from_dataframe(self, dataframe):
         self.dataframe = dataframe
+        parties = self.dataframe["parti_ratt_financier"].dropna().values
+        self._register_parties(parties)
 
     def display_chart(self):
         data = self.dataframe
@@ -83,6 +84,12 @@ class SetOfParliamentMembers:
             result[party] = subset
 
         return result
+
+    def __str__(self):
+        names = []  ## todo: remplacer à la fin par une compréhension
+        for row_index, mp in self.dataframe.iterrows():  ##todo: ici il y a du packing/unpacking
+            names += [mp.nom]
+        return str(names)  # Python knows how to convert a list into a string
 
     def __iter__(self):
         self.iterator_state = 0
@@ -147,21 +154,100 @@ class SetOfParliamentMembers:
     def __gt__(self, other):
         return self.number_of_mps > other.number_of_mps
 
-    # The following 2 methods are a way to simulate a calculated attribute
-    # (attribute 'number_of_mps' is calculated from attribute 'seld.dataframe')
-    # There is a much better way to do it, using decorator '@property'
-    def __getattr__(self, attr):
-        if attr == "number_of_mps":  #todo: faire la version avec @property
-            return len(self.dataframe)
+    @property
+    def number_of_mps(self):
+        return len(self.dataframe)
 
-    def __setattr__(self, attr, value):
-        if attr == "number_of_mps":
-            raise Exception("You can not set the number of MPs!")
-        self.__dict__[attr] = value  # todo: c'est l'occasion de parler de __dict__ dans le cours ;)
+    @number_of_mps.setter
+    def number_of_mps(self, value):
+        raise Exception("You can not set the number of MPs!")
+
+    @classmethod
+    def _register_parties(cl, parties):
+        cl.ALL_REGISTERED_PARTIES = cl._group_two_lists_of_parties(cl.ALL_REGISTERED_PARTIES, list(parties))
+
+    @classmethod
+    def get_all_registered_parties(cl):
+        return cl.ALL_REGISTERED_PARTIES
+
+    @staticmethod
+    def _group_two_lists_of_parties(original, new):
+        return list(set(original + new))  # This line drop duplicates in the list 'original + new'
+
+    def number_mp_by_party(self):
+        data = self.dataframe
+
+        result = {}
+        for party in self.get_all_registered_parties():
+            mps_of_this_party = data[data["parti_ratt_financier"] == party]
+            result[party] = len(mps_of_this_party)
+
+        return result
+
+
+    @staticmethod
+    def display_histogram(values):
+        fig, ax = plt.subplots()
+        ax.hist(values, bins = 20)
+        plt.title("Ages ({} MPs)".format(len(values)))
+        plt.show()
+
+    def _compute_age_column(self):
+        now = dt.datetime.now()
+        data = self.dataframe
+
+        # In data, the column "date_naissance"  still contains string (ex:"1945-08-10")
+        # We first have to convert this to a column of type datetime.
+        if not BIRTH_COLUMN_NAME in data.columns:
+            data[BIRTH_COLUMN_NAME] = \
+                data["date_naissance"].apply(lambda string: dt.datetime.strptime(string,"%Y-%m-%d"))
+
+        if not AGE_COLUMN_NAME in data.columns:
+            data[AGE_COLUMN_NAME] = data[BIRTH_COLUMN_NAME].apply(lambda date: now-date)
+
+        # Here is an other way to fill a column of a dataframe (less elegant than the previous ones!):
+        new_column = []
+        for age in data[AGE_COLUMN_NAME]:
+            # age is of type datetime.timedelta (because it was
+            # calculated from a difference between two dates)
+            # Here, we want to convert it to an integer containing
+            # the the age, expressed in years.
+            age_in_years = int(age.days / 365)
+            new_column += [age_in_years]
+        data[AGE_YEARS_COLUMN_NAME] = new_column
+
+    def split_by_age(self, age_split):
+        data = self.dataframe
+        self._compute_age_column()
+        self.display_histogram(data[AGE_YEARS_COLUMN_NAME].values)
+
+        result = {}
+
+        if age_split < MINIMUM_MP_AGE:
+            categ = "Under (or equal) {} years old".format(MINIMUM_MP_AGE)
+            s = SetOfParliamentMembers(categ)
+            s.data_from_dataframe(data)
+            result = {categ : s}
+
+        else:
+            categ1 = "Under (or equal) {} years old".format(age_split)
+            categ2 = "Over {} years old".format(age_split)
+            s1, s2 = SetOfParliamentMembers(categ1), SetOfParliamentMembers(categ2)
+            condition = data[AGE_YEARS_COLUMN_NAME] <= age_split
+            data1 = data[condition]
+            data2 = data[~condition]
+            s1.data_from_dataframe(data1)
+            s2.data_from_dataframe(data2)
+            result = {
+                categ1 : s1,
+                categ2 : s2
+            }
+
+        return result
 
 
 def launch_analysis(data_file, by_party=False, info=False, displaynames=False,
-                    searchname=None, index=None, groupfirst=None):
+                    searchname=None, index=None, groupfirst=None, by_age=None):
     sopm = SetOfParliamentMembers("All MPs")
     sopm.data_from_csv(os.path.join(DATA_DIRECTORY, data_file))
 
@@ -208,6 +294,18 @@ def launch_analysis(data_file, by_party=False, info=False, displaynames=False,
         s = sum(parties_by_size[0:groupfirst])
 
         s.display_chart()
+
+    if by_age is not None:
+        by_age = int(by_age)  # by_age was still a string, passed by the command line
+        for age_group, s in sopm.split_by_age(by_age).items():
+            print()
+            print("-" * 50)
+            print(age_group + ":")
+            s.display_chart()
+            print()
+            print("{} : Distribution by party:".format(age_group))
+            print()
+            pprint.pprint(s.number_mp_by_party())
 
 
 if __name__ == "__main__":

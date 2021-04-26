@@ -10,6 +10,7 @@ import analysis.xml as x_an
 
 HELP_DATAFILE = "Specify the name of the file to be analysed."
 HELP_BYPARTY = "Display a chart for each party."
+HELP_BYAGE="displays a graph for the MPs splitted between those who are over and those who are under the value of --byage"
 HELP_SEARCH_BY_NAME = "Get parlementary member by his name."
 HELP_SEARCH_BY_INDEX = "Get parlementary member by his index."
 HELP_DISPLAY_NAME = "Displays the names of all the mps."
@@ -27,6 +28,7 @@ def parse_arguments():
     parser.add_argument("-g", "--groupfirst", help=HELP_N_FIRST_GROUP)
 
     parser.add_argument("-p", "--byparty", action='store_true', help=HELP_BYPARTY)
+    parser.add_argument("-a", "--byage", help=HELP_BYAGE)
     parser.add_argument("-n", "--displaynames", action='store_true', help=HELP_DISPLAY_NAME)
     parser.add_argument("-i", "--info", action='store_true', help=HELP_INFO)
     parser.add_argument("-v", "--verbose", action='store_true', help=HELP_VERBOSE)
