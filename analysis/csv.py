@@ -84,6 +84,17 @@ class SetOfParliamentMembers:
 
         return result
 
+    def __iter__(self):
+        self.iterator_state = 0
+        return self
+
+    def __next__(self):
+        if self.iterator_state >= len(self):
+            raise StopIteration()
+        result = self[self.iterator_state]
+        self.iterator_state += 1
+        return result
+
     def __repr__(self):
         return "SetOfParliamentMembers : {}".format(len(self.dataframe))
 
@@ -94,7 +105,6 @@ class SetOfParliamentMembers:
         return name in self.dataframe[FIELD_LASTNAME].values
 
     def __getitem__(self, index):
-
         if index < 0:
             raise Exception("An index can't be negative!")
         elif index >= len(self.dataframe):
@@ -167,9 +177,9 @@ def launch_analysis(data_file, by_party=False, info=False, displaynames=False,
         print(repr(sopm.total_mps()))
 
     if displaynames:
-        log.info("Display names")
-        print()
-        print(repr(sopm.dataframe[FIELD_NAME]))
+        log.info("Display names and emails")
+        for mp in sopm:
+            print(mp["nom"], '                    ', mp["emails"])
 
     if searchname is not None:
         log.info("searchname : {}".format(searchname))
